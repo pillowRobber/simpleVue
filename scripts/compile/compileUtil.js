@@ -25,8 +25,14 @@ const compileUtil = {
   },
   model(node, expr, vm) {
     const value = this.getValue(expr, vm);
+    // 绑定更新函数 数据 =》 视图
     new Watcher(vm,expr,(newVal)=> {
       this.updater.modelUpdater(node,newVal)
+    })
+    //  视图 =》 数据 =》 视图
+    node.addEventListener('input',(e) => {
+      // 设置值
+      this.setVal(expr,vm,e.target.value)
     })
     this.updater.modelUpdater(node, value);
   },
@@ -54,6 +60,11 @@ const compileUtil = {
     return expr.replace(/\{\{(.+?)\}\}/g,(...args) => {
       return this.getValue(args[1],vm)
     })
+  },
+  setVal(expr,vm,inputVal) {
+    return expr.split(".").reduce((data, currentVal) => {
+      data[currentVal] = inputVal
+    }, vm.$data);
   }
 };
 
